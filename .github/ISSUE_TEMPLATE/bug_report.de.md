@@ -11,7 +11,7 @@ Mehrsprachige bug_report-Unterstützung
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](bug_report.md)
 [![es](https://img.shields.io/badge/lang-es-yellow.svg)](bug_report.es.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](bug_report.fr.md)
+<!-- [![de](https://img.shields.io/badge/lang-de-black.svg)](bug_report.de.md) -->
 
 ## Fehlerbericht
 

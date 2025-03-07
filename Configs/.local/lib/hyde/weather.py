@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-import os
-import sys
 import json
-from datetime import datetime
 import requests
+from datetime import datetime
+import os
+
 
 ### Constants ###
 WEATHER_CODES = {
@@ -51,7 +51,7 @@ WEATHER_CODES = {
 
 ### Functions ###
 def load_env_file(filepath):
-    with open(filepath, encoding='utf-8') as f:
+    with open(filepath) as f:
         for line in f:
             if line.strip() and not line.startswith("#"):
                 if line.startswith("export "):
@@ -71,43 +71,43 @@ def get_description(weatherinstance):
 def get_temperature(weatherinstance):
     if temp_unit == "c":
         return weatherinstance["temp_C"] + "°C"
-
-    return weatherinstance["temp_F"] + "°F"
+    else:
+        return weatherinstance["temp_F"] + "°F"
 
 
 def get_temperature_hour(weatherinstance):
     if temp_unit == "c":
         return weatherinstance["tempC"] + "°C"
-
-    return weatherinstance["tempF"] + "°F"
+    else:
+        return weatherinstance["tempF"] + "°F"
 
 
 def get_feels_like(weatherinstance):
     if temp_unit == "c":
         return weatherinstance["FeelsLikeC"] + "°C"
-
-    return weatherinstance["FeelsLikeF"] + "°F"
+    else:
+        return weatherinstance["FeelsLikeF"] + "°F"
 
 
 def get_wind_speed(weatherinstance):
     if windspeed_unit == "km/h":
         return weatherinstance["windspeedKmph"] + "Km/h"
-
-    return weatherinstance["windspeedMiles"] + "Mph"
+    else:
+        return weatherinstance["windspeedMiles"] + "Mph"
 
 
 def get_max_temp(day):
     if temp_unit == "c":
         return day["maxtempC"] + "°C"
-
-    return day["maxtempF"] + "°F"
+    else:
+        return day["maxtempF"] + "°F"
 
 
 def get_min_temp(day):
     if temp_unit == "c":
         return day["mintempC"] + "°C"
-
-    return day["mintempF"] + "°F"
+    else:
+        return day["mintempF"] + "°F"
 
 
 def get_sunrise(day):
@@ -139,8 +139,8 @@ def format_temp(temp):
 def get_timestamp(time_str):
     if time_format == "24h":
         return datetime.strptime(time_str, "%I:%M %p").strftime("%H:%M")
-
-    return time_str
+    else:
+        return time_str
 
 
 def format_chances(hour):
@@ -155,11 +155,10 @@ def format_chances(hour):
         "chanceofwindy": "Wind",
     }
 
-    conditions = [
-        f"{chances[event]} {hour[event]}%"
-        for event in chances
-        if int(hour.get(event, 0)) > 0
-    ]
+    conditions = []
+    for event in chances.keys():
+        if int(hour[event]) > 0:
+            conditions.append(chances[event] + " " + hour[event] + "%")
     return ", ".join(conditions)
 
 
@@ -203,33 +202,25 @@ try:
         os.getenv("WEATHER_FORECAST_DAYS", "3")
     )  # Number of days to show the forecast for (default: 3)
 except ValueError:
-    FORECAST_DAYS = 3
+    forecast_days = 3
 get_location = os.getenv(
     "WEATHER_LOCATION", ""
-).replace(" ", "_")  # Name of the location to get the weather from (default: '')
-# Parse the location to wttr.in format (snake_case)
+)  # Name of the location to get the weather from (default: '')
 
 # Check if the variables are set correctly
 if temp_unit not in ("c", "f"):
-    TEMP_UNIT = "c"
+    temp_unit = "c"
 if time_format not in ("12h", "24h"):
-    TIME_FORMAT = "12h"
+    time_format = "12h"
 if windspeed_unit not in ("km/h", "mph"):
-    WINDSPEED_UINT = "km/h"
+    windspeed_unit = "km/h"
 if forecast_days not in range(4):
-    FORECAST_DAYS = 3
+    forecast_days = 3
 
 ### Main Logic ###
 data = {}
-URL = f"https://wttr.in/{get_location}?format=j1"
-
 # Get the weather data
-headers = {"User-Agent": "Mozilla/5.0"}
-response = requests.get(URL, timeout=10, headers=headers)
-try:
-    weather = response.json()
-except json.decoder.JSONDecodeError:
-    sys.exit(1)
+weather = requests.get(f"https://wttr.in/{get_location}?format=j1", timeout=10).json()
 current_weather = weather["current_condition"][0]
 
 # Get the data to display
@@ -254,17 +245,17 @@ if show_today_details:
     data["tooltip"] += f"Humidity: {current_weather['humidity']}%\n"
 # Get the weather forecast for the next 2 days
 for i in range(forecast_days):
-    day_instance = weather["weather"][i]
-    data["tooltip"] += "\n<b>"
+    day = weather["weather"][i]
+    data["tooltip"] += f"\n<b>"
     if i == 0:
         data["tooltip"] += "Today, "
     if i == 1:
         data["tooltip"] += "Tomorrow, "
-    data["tooltip"] += f"{day_instance['date']}</b>\n"
-    data["tooltip"] += f"⬆️ {get_max_temp(day_instance)} ⬇️ {get_min_temp(day_instance)} "
-    data["tooltip"] += f"🌅 {get_sunrise(day_instance)} 🌇 {get_sunset(day_instance)}\n"
+    data["tooltip"] += f"{day['date']}</b>\n"
+    data["tooltip"] += f"⬆️ {get_max_temp(day)} ⬇️ {get_min_temp(day)} "
+    data["tooltip"] += f"🌅 {get_sunrise(day)} 🌇 {get_sunset(day)}\n"
     # Get the hourly forecast for the day
-    for hour in day_instance["hourly"]:
+    for hour in day["hourly"]:
         if i == 0:
             if int(format_time(hour["time"])) < datetime.now().hour - 2:
                 continue

@@ -7,7 +7,6 @@ labels: "Error, necesita clasificación"
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](bug_report.md)
 [![de](https://img.shields.io/badge/lang-de-black.svg)](bug_report.de.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](bug_report.fr.md)
 
 ## Reportar bug
 

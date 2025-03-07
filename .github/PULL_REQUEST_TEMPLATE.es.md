@@ -2,7 +2,6 @@
 
 [![en](https://img.shields.io/badge/lang-en-red.svg)](PULL_REQUEST_TEMPLATE.md)
 [![de](https://img.shields.io/badge/lang-de-black.svg)](PULL_REQUEST_TEMPLATE.de.md)
-[![fr](https://img.shields.io/badge/lang-fr-blue.svg)](PULL_REQUEST_TEMPLATE.fr.md)
 
 ## Descripción
 
